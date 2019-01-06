@@ -7,8 +7,8 @@ This repository describes a method to visualize winds over long periods of time.
 The demo shows 12 days of wind data. The brighter the color - the higher was the
 speed in that area. The darker the color - the slower the speed.
 
-Note: The continents and islands were not intentionally rendered in this visualization.
-They are rather "artifact" of the data - winds are slower over landmass.
+The landmass was not intentionally rendered in this visualization. Winds velocities are
+lower over land and that reveals us the "map" in the background.
 
 The image above has poor quality (to ensure that this repository loads faster).
 To see a high resolution video for a longer period of time please go here: _TODO: Link_
@@ -16,7 +16,7 @@ To see a high resolution video for a longer period of time please go here: _TODO
 ## The method
 
 In a single day we can "capture" wind by recording its velocity vector. If we record
-these vectors in every point on the Earth, we'd get nothing else but a vector field.
+these vectors in every point on the Earth, we'd get nothing else but a [vector field](https://en.wikipedia.org/wiki/Vector_field).
 
 One way to visualize a vector field is to use streamlines. We drop thousands particles onto the vector
 field, and trace their movement. There are many ways to draw traces "nicely" and one of such ways was
