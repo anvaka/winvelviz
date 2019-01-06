@@ -1,13 +1,20 @@
+/**
+ * Server side rendering of the streamlines from the vector field
+ */
 const fs = require("fs");
 const path = require("path");
 const streamlines = require("@anvaka/streamlines");
 const { createCanvas } = require("canvas");
-// const getFiles = require("./getFiles");
 
+/**
+ * These three parameters can be tweaked to modify the rendering quality.
+ * To learn more about their meaning, please see https://github.com/anvaka/streamlines
+ */
 const dSep = 0.25;
 const dTest = 0.125;
 const timeStep = 1.9;
 
+// node does not have `window.performance`, which is used by `streamlines` library:
 global.window = {
   performance: require("perf_hooks").performance
 };
@@ -16,18 +23,9 @@ var gradient = makeGradient([
   { stop: 0.0, r: 0x28, g: 0x28, b: 0x28 },
   { stop: 0.5, r: 0x6a, g: 0xa8, b: 0xc6 },
   { stop: 1.0, r: 0xe2, g: 0xe5, b: 0xaa }
-  //   { stop: 0.0, r: 0x32, g: 0x88, b: 0xbd },
-  //   { stop: 0.1, r: 0x66, g: 0xc2, b: 0xa5 },
-  //   { stop: 0.2, r: 0xab, g: 0xdd, b: 0xa4 },
-  //   { stop: 0.3, r: 0xe6, g: 0xf5, b: 0x98 },
-  //   { stop: 0.4, r: 0xfe, g: 0xe0, b: 0x8b },
-  //   { stop: 0.5, r: 0xfd, g: 0xae, b: 0x61 },
-  //   { stop: 1.0, r: 0xf4, g: 0x6d, b: 0x43 }
 ]);
 
 let queue = [process.argv[2]];
-// getFiles(); // ["2018010100.json"]; //
-//queue = ["2018101618.json"]; //
 
 processNextInQueue();
 
@@ -184,21 +182,10 @@ function processItem(item) {
     if (!p) return "rgba(0, 0, 0, 1.)";
     var gray = Math.sqrt(p.x * p.x + p.y * p.y) / maxVelocity;
     var c = gradient(gray);
-    // c.r = Math.round(255 * gray * 0.2);
-    // c.g = Math.round(255 * gray * 0.8);
-    // c.b = Math.round(255 * gray);
     return (
       "rgba(" + c.r + ", " + c.g + "," + c.b + ", " + (0.1 + gray * 0.9) + ")"
     );
   }
-
-  //   function gradient(c) {
-  //     return {
-  //       r: Math.round(255 * c),
-  //       g: Math.round(255 * c),
-  //       b: Math.round(255 * c)
-  //     };
-  //   }
 
   function saveCanvas() {
     var name = item.split(".")[0];
@@ -208,10 +195,7 @@ function processItem(item) {
       [name.substr(0, 4), name.substr(4, 2), name.substr(6, 2)].join("-"),
       canvasWidth - 104,
       canvasHeight - 8
-    ); // canvasWidth / 2 - 100, canvasHeight - 100);
-    // ctx.fillStyle = "#ddd";
-    // ctx.font = "12px 'Open Sans'";
-    // ctx.fillText("twitter.com/anvaka", canvasWidth - 150, canvasHeight - 8); // canvasWidth / 2 - 100, canvasHeight - 100);
+    );
     const buf = canvas.toBuffer();
     fs.writeFileSync(path.join("out", item + ".png"), buf);
   }
