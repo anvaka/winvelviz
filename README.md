@@ -30,10 +30,10 @@ them into single video.
 The data comes from https://nomads.ncdc.noaa.gov/data/gfsanl/ - I downloaded every grib file for
 the year 2018, and extracted vector fields for winds at the height of 10 meters.
 
-Along the way I [wrote a few tools](https://github.com/anvaka/winvelviz/blob/master/code/) to extract data
-and turn it into images.
+Along the way I wrote a few tools to extract data
+and turn it into images (see [the `code` folder](https://github.com/anvaka/winvelviz/blob/master/code/) ).
 
-Unfortunately there are 10-20 days missing from this source. I couldn't find an alternative,r
+Unfortunately there are 10-20 days missing from this source. I couldn't find an alternative,
 but it was not critical for my exploration.
 
 ## Thanks!
