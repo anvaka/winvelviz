@@ -4,8 +4,14 @@ This repository describes a method to visualize winds over long periods of time.
 
 ![couple days demo](https://i.imgur.com/iiNR6le.gif)
 
-The demo above shows 12 days of wind data. It has reduced quality. To see a high resolution video
-for a longer period of time please go here: _TODO: Link_
+The demo shows 12 days of wind data. The brighter the color - the higher was the
+speed in that area. The darker the color - the slower the speed.
+
+Note: The continents and islands were not intentionally rendered in this visualization.
+They are rather "artifact" of the data - winds are slower over landmass.
+
+The image above has poor quality (to ensure that this repository loads faster).
+To see a high resolution video for a longer period of time please go here: _TODO: Link_
 
 ## The method
 
