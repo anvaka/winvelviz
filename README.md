@@ -11,7 +11,7 @@ The landmass was not intentionally rendered in this visualization. Winds velocit
 lower over land and that reveals us the "map" in the background.
 
 The image above has poor quality (to ensure that this repository loads faster).
-To see a high resolution video for a longer period of time please go here: _TODO: Link_
+To see a high resolution video for a longer period of time please go here: https://www.youtube.com/watch?v=u-vCQn0c0qE
 
 ## The method
 
