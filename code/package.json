@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "parse": "^2.1.0",
+    "pngjs": "^3.3.3"
+  },
+  "dependencies": {
+    "@anvaka/streamlines": "^1.1.0",
+    "canvas": "^2.2.0"
+  }
+}
