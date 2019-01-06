@@ -9,7 +9,7 @@ for a longer period of time please go here: _TODO: Link_
 
 ## The method
 
-In a single day we can "capture" wind by recording its direction and strength (or a wind vector). If we record
+In a single day we can "capture" wind by recording its velocity vector. If we record
 these vectors in every point on the Earth, we'd get nothing else but a vector field.
 
 One way to visualize a vector field is to use streamlines. We drop thousands particles onto the vector
