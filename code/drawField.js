@@ -12,7 +12,11 @@ const { createCanvas } = require("canvas");
  */
 const dSep = 0.25;
 const dTest = 0.125;
-const timeStep = 1.9;
+const timeStep = 0.9;
+
+const canvasWidth = 1280;
+const canvasHeight = 720;
+const globalAlpha = 1;
 
 // node does not have `window.performance`, which is used by `streamlines` library:
 global.window = {
@@ -38,14 +42,11 @@ function processNextInQueue() {
 function processItem(item) {
   console.log("processing ", item);
 
-  const canvasWidth = 1280;
-  const canvasHeight = 720;
-
   const canvas = createCanvas(canvasWidth, canvasHeight, "png");
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = "#141524";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = globalAlpha;
 
   const data = require("./" + path.join("data", item));
   const u = data.u;
@@ -182,6 +183,7 @@ function processItem(item) {
     if (!p) return "rgba(0, 0, 0, 1.)";
     var gray = Math.sqrt(p.x * p.x + p.y * p.y) / maxVelocity;
     var c = gradient(gray);
+    gray = 1;
     return (
       "rgba(" + c.r + ", " + c.g + "," + c.b + ", " + (0.1 + gray * 0.9) + ")"
     );
