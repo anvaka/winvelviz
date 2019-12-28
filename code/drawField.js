@@ -41,6 +41,11 @@ function processNextInQueue() {
 
 function processItem(item) {
   console.log("processing ", item);
+  let itemName = path.join("out", item + ".png")
+  if (fs.existsSync(itemName)) {
+    console.log('File already created ' + itemName);
+    return Promise.resolve();
+  }
 
   const canvas = createCanvas(canvasWidth, canvasHeight, "png");
   const ctx = canvas.getContext("2d");
@@ -49,8 +54,8 @@ function processItem(item) {
   ctx.globalAlpha = globalAlpha;
 
   const data = require("./" + path.join("data", item));
-  const u = data.u;
-  const v = data.v;
+  const u = toObject(data.u);
+  const v = toObject(data.v);
 
   var uMax = u.maximum;
   var uMin = u.minimum;
@@ -199,8 +204,17 @@ function processItem(item) {
       canvasHeight - 8
     );
     const buf = canvas.toBuffer();
-    fs.writeFileSync(path.join("out", item + ".png"), buf);
+    fs.writeFileSync(itemName, buf);
   }
+}
+
+function toObject(arrayOfKeyValues) {
+  return arrayOfKeyValues.reduce(
+    (prev, current) => {
+      prev[current.key] = current.value;
+      return prev;
+    }, {}
+  );
 }
 
 function makeGradient(stops) {

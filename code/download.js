@@ -13,53 +13,91 @@ var fs = require("fs");
 var { execSync } = require("child_process");
 
 var saveToDir = os.tmpdir();
-var hours = ["00", "06", "12", "18"];
 
-var d = new Date(2018, 0);
-// d = new Date(2018, 2, 28) - apr 9 - missing;
-var year = d.getFullYear();
+makeYearFileList(2019).forEach(saveJson)
 
-do {
-  saveJson(year, d.getMonth() + 1, d.getDate());
-  d.setDate(d.getDate() + 1);
-  year = d.getFullYear();
-} while (year < 2019);
+function makeYearFileList(startYear) {
+  let list = [];
+  var hours = ["00", "06", "12", "18"];
 
-function saveJson(year, month, day) {
-  if (month < 10) month = "0" + ("" + month);
-  if (day < 10) day = "0" + ("" + day);
-  for (var i = 0; i < hours.length; ++i) {
-    var HH = hours[i];
-    var fileName = `gfsanl_4_${year}${month}${day}_${HH}00_000.grb2`;
-    // Note: for lower resolution you can  try:
-    // var fileName = `gfsanl_3_${year}${month}${day}_${HH}00_000.grb2`;
-    var url = `https://nomads.ncdc.noaa.gov/data/gfsanl/${year}${month}/${year}${month}${day}/${fileName}`;
-    console.log("downloading " + url);
-    var nodeFileName = `${year}${month}${day}${HH}.json`;
+  var d = new Date(startYear, 0);
+  var year = d.getFullYear();
+   while (year < 2020) {
+    let month = d.getMonth() + 1;
+    let day = d.getDate();
+    if (month < 10) month = "0" + ("" + month);
+    if (day < 10) day = "0" + ("" + day);
+    month = '' + month;
+    day = '' + day;
+    for (var i = 0; i < hours.length; ++i) {
+      var hour = hours[i];
+      var nodeFileName = `${year}${month}${day}${hour}.json`;
+      var outName = path.join(__dirname, "data", nodeFileName);
+      if (!fs.existsSync(outName)) {
+        list.push({year, month, day, hour})
+      }
+    }
 
-    var fullFileName = path.join(saveToDir, fileName);
-    var uFileName = fullFileName + "u";
-    var vFileName = fullFileName + "v";
+    d.setDate(d.getDate() + 1);
+    year = d.getFullYear();
+  };
 
+  return list;
+}
+
+function saveJson(file) {
+  var year = file.year;
+  var month = file.month;
+  var day = file.day;
+  var HH = file.hour;
+  var fileName = `gfsanl_4_${year}${month}${day}_${HH}00_000.grb2`;
+  // Note: for lower resolution you can  try:
+  // var fileName = `gfsanl_3_${year}${month}${day}_${HH}00_000.grb2`;
+  var url = `https://nomads.ncdc.noaa.gov/data/gfsanl/${year}${month}/${year}${month}${day}/${fileName}`;
+  console.log("downloading " + url);
+  var nodeFileName = `${year}${month}${day}${HH}.json`;
+
+  var fullFileName = path.join(saveToDir, fileName);
+  var uFileName = fullFileName + "u";
+  var vFileName = fullFileName + "v";
+  var filesCopied = false;
+  if (fs.existsSync(fullFileName)) {
+    console.log(`${fullFileName} already exists. Trying to parse...`);
+    filesCopied = copyGribFiles();
+  }
+  if (!filesCopied) {
     try {
       execSync(`curl "${url}" > ${fullFileName}`);
+    } catch (e) {
+      console.error('Could not download ' + url);
+      console.error(e);
+      return false;
+    }
+    filesCopied = copyGribFiles();
+  }
+  if (!filesCopied) {
+    return;
+  }
+
+  const buffCommand = `printf "{\\"u\\":\`grib_dump -j ${uFileName}\`,\\"v\\":\`grib_dump -j ${vFileName}\`}"`
+  var buff = execSync(buffCommand, {maxBuffer: 512 * 1024 * 1024});
+  var content = JSON.stringify(JSON.parse(buff.toString()));
+
+  var outName = path.join(__dirname, "data", nodeFileName);
+  fs.writeFileSync(outName, content, "utf8");
+  console.log("Saved to " + outName);
+
+  function copyGribFiles() {
+    try {
       execSync(`grib_copy -w shortName=10u ${fullFileName} ${uFileName}`);
       execSync(`grib_copy -w shortName=10v ${fullFileName} ${vFileName}`);
+      return true;
     } catch (e) {
       // Sometimes curl gives 404, I ignored them. But if you are here reading this,
       // make sure your grib-api is installed (`brew install grib-api` if you are on mac)
-      console.log("Failed to download and parse ", url);
+      console.log("Failed to parse " + fullFileName);
       console.log(e);
-      continue;
+      return false;
     }
-
-    var buff = execSync(
-      `printf "{\\"u\\":\`grib_dump -j ${uFileName}\`,\\"v\\":\`grib_dump -j ${vFileName}\`}"`
-    );
-    var content = JSON.stringify(JSON.parse(buff.toString()));
-
-    var outName = path.join(__dirname, "data", nodeFileName);
-    fs.writeFileSync(outName, content, "utf8");
-    console.log("savedTo " + outName);
   }
 }
