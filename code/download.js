@@ -31,10 +31,11 @@ function makeYearFileList(startYear) {
     day = '' + day;
     for (var i = 0; i < hours.length; ++i) {
       var hour = hours[i];
+      var fileRecord = {year, month, day, hour};
       var nodeFileName = `${year}${month}${day}${hour}.json`;
       var outName = path.join(__dirname, "data", nodeFileName);
       if (!fs.existsSync(outName)) {
-        list.push({year, month, day, hour})
+        list.push(fileRecord)
       }
     }
 
@@ -45,17 +46,25 @@ function makeYearFileList(startYear) {
   return list;
 }
 
+function getGrb2FileName(file) {
+  // Note: for lower resolution you can  try:
+  // var fileName = `gfsanl_3_${year}${month}${day}_${HH}00_000.grb2`;
+  return `gfsanl_4_${file.year}${file.month}${file.day}_${file.hour}00_000.grb2`;
+}
+
+function getNodeFileName(file) {
+  return `${file.year}${file.month}${file.day}${file.hour}.json`;
+}
+
 function saveJson(file) {
   var year = file.year;
   var month = file.month;
   var day = file.day;
   var HH = file.hour;
-  var fileName = `gfsanl_4_${year}${month}${day}_${HH}00_000.grb2`;
-  // Note: for lower resolution you can  try:
-  // var fileName = `gfsanl_3_${year}${month}${day}_${HH}00_000.grb2`;
+  var fileName = getGrb2FileName(file);
   var url = `https://nomads.ncdc.noaa.gov/data/gfsanl/${year}${month}/${year}${month}${day}/${fileName}`;
   console.log("downloading " + url);
-  var nodeFileName = `${year}${month}${day}${HH}.json`;
+  var nodeFileName = getNodeFileName(file);
 
   var fullFileName = path.join(saveToDir, fileName);
   var uFileName = fullFileName + "u";
@@ -67,13 +76,17 @@ function saveJson(file) {
   }
   if (!filesCopied) {
     try {
-      execSync(`curl "${url}" > ${fullFileName}`);
+      execSync(`curl "${url}" > ${fullFileName}`, {stdio: 'inherit'});
     } catch (e) {
       console.error('Could not download ' + url);
       console.error(e);
       return false;
     }
-    filesCopied = copyGribFiles();
+    if (fs.existsSync(fullFileName)) {
+      filesCopied = copyGribFiles();
+    } else {
+      console.error('Could not download ' + url + ' file not found: ' + fullFileName);
+    }
   }
   if (!filesCopied) {
     return;
@@ -89,14 +102,13 @@ function saveJson(file) {
 
   function copyGribFiles() {
     try {
-      execSync(`grib_copy -w shortName=10u ${fullFileName} ${uFileName}`);
-      execSync(`grib_copy -w shortName=10v ${fullFileName} ${vFileName}`);
+      execSync(`grib_copy -w shortName=10u ${fullFileName} ${uFileName}`, {stdio: 'inherit'});
+      execSync(`grib_copy -w shortName=10v ${fullFileName} ${vFileName}`, {stdio: 'inherit'});
       return true;
     } catch (e) {
       // Sometimes curl gives 404, I ignored them. But if you are here reading this,
       // make sure your grib-api is installed (`brew install grib-api` if you are on mac)
       console.log("Failed to parse " + fullFileName);
-      console.log(e);
       return false;
     }
   }
