@@ -23,11 +23,17 @@ global.window = {
   performance: require("perf_hooks").performance
 };
 
-var gradient = makeGradient([
-  { stop: 0.0, r: 0x28, g: 0x28, b: 0x28 },
-  { stop: 0.5, r: 0x6a, g: 0xa8, b: 0xc6 },
-  { stop: 1.0, r: 0xe2, g: 0xe5, b: 0xaa }
-]);
+let earth = [
+  { stop: 0.0, r: 0x0C, g: 0x16, b: 0x34 },
+  { stop: 0.1, r: 0x0B, g: 0x1D, b: 0x4A },
+  { stop: 0.2, r: 0x17, g: 0x35, b: 0x62 },
+  { stop: 0.4, r: 0x2F, g: 0x50, b: 0x7D },
+  { stop: 0.6, r: 0x4A, g: 0x75, b: 0xAA },
+  { stop: 0.8, r: 0x9A, g: 0xB5, b: 0xD8 },
+  { stop: 1.0, r: 0xff, g: 0xff, b: 0xff }
+]
+
+var gradient = makeGradient(earth);
 
 let queue = [process.argv[2]];
 
@@ -42,14 +48,14 @@ function processNextInQueue() {
 function processItem(item) {
   console.log("processing ", item);
   let itemName = path.join("out", item + ".png")
-  if (fs.existsSync(itemName)) {
-    console.log('File already created ' + itemName);
-    return Promise.resolve();
-  }
+  // if (fs.existsSync(itemName)) {
+  //   console.log('File already created ' + itemName);
+  //   return Promise.resolve();
+  // }
 
   const canvas = createCanvas(canvasWidth, canvasHeight, "png");
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#141524";
+  ctx.fillStyle = "#070B35";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   ctx.globalAlpha = globalAlpha;
 
@@ -189,8 +195,9 @@ function processItem(item) {
     var gray = Math.sqrt(p.x * p.x + p.y * p.y) / maxVelocity;
     var c = gradient(gray);
     gray = 1;
+      // (0.6 + gray * 0.4)
     return (
-      "rgba(" + c.r + ", " + c.g + "," + c.b + ", " + (0.1 + gray * 0.9) + ")"
+      "rgba(" + c.r + ", " + c.g + "," + c.b + ", " + Math.round(100*c.a/255)/100 + ")"
     );
   }
 
@@ -244,10 +251,13 @@ function makeGradient(stops) {
 
   // linear interpolation between r, g, and b components of a color
   function mix(a, b, t) {
+    let srcAlpha = a.a === undefined ? 255 : a.a;
+    let dstAlpha = b.a === undefined ? 255 : b.a;
     return {
       r: Math.round(a.r * t + (1 - t) * b.r),
       g: Math.round(a.g * t + (1 - t) * b.g),
-      b: Math.round(a.b * t + (1 - t) * b.b)
+      b: Math.round(a.b * t + (1 - t) * b.b),
+      a: Math.round(srcAlpha * t + (1 - t) * dstAlpha)
     };
   }
 }
